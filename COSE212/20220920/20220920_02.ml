@@ -45,3 +45,13 @@ let is_all_pos l = fold_left (fun x y -> x && (y>0)) true l;;
 is_all_pos [1;2;3;4];;
 is_all_pos [1;3;-2;4];;
 
+let square x = x * x;;
+let cube x = x * x * x;;
+
+let map f l = fold_right (fun x y -> (f x)::y) l [];;
+map square [1;2;3;4];;
+map cube [1;2;3;4];;
+
+let map f l = fold_left (fun x y -> x@[f y]) [] l;;
+map square [1;2;3;4];;
+map cube [1;2;3;4];;
