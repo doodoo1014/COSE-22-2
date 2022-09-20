@@ -55,3 +55,11 @@ map cube [1;2;3;4];;
 let map f l = fold_left (fun x y -> x@[f y]) [] l;;
 map square [1;2;3;4];;
 map cube [1;2;3;4];;
+
+let even x = x mod 2 = 0;;
+
+let filter f l = fold_right (fun x y -> if (f x) then x::y else y) l [];;
+filter even [1;2;3;4];;
+
+let filter f l = fold_left (fun x y -> if (f y) then x@[y] else x) [] l;;
+filter even [1;2;3;4];;
