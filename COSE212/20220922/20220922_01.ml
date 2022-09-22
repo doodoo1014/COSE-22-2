@@ -1,62 +1,86 @@
 type program = exp
 and exp = 
-  | CONST of int
-  | VAR of string
-  | ADD of exp * exp
-  | SUB of exp * exp
-  | MUL of exp * exp
-  | ISZERO of exp
-  | IF of exp * exp * exp
-  | LET of string * exp * exp
-  | READ
+  | Int of int
+  | Var of string
+  | Plus of exp * exp
+  | Minus of exp * exp
+  | Mul of exp * exp
+  | Iszero of exp
+  | If of exp * exp * exp
+  | Let of string * exp * exp
+  | Read
 
 let p1 =
-  LET ("x", CONST 1,
-    ADD (VAR "x", CONST 2))
+  Let ("x", Int 1,
+    Plus (Var "x", Int 2))
 
 let p2 =
-  LET ("x", CONST 1,
-    LET ("y", CONST 2,
-      ADD (VAR "x", VAR "y")))
+  Let ("x", Int 1,
+    Let ("y", Int 2,
+      Plus (Var "x", Var "y")))
 
 let p3 =
-  LET ("x", LET ("y", CONST 2,
-    ADD (VAR "y", CONST 1)),
-  ADD (VAR "x", CONST 3))
+  Let ("x", Let ("y", Int 2,
+    Plus (Var "y", Int 1)),
+  Plus (Var "x", Int 3))
 
 let p4 =
-  LET ("x", CONST 1,
-    LET ("y", CONST 2,
-      LET ("x", CONST 3,
-        ADD (VAR "x", VAR "y"))))
+  Let ("x", Int 1,
+    Let ("y", Int 2,
+      Let ("x", Int 3,
+        Plus (Var "x", Var "y"))))
 
 let p5 =
-  LET ("x", CONST 1,
-    LET ("y", LET ("x", CONST 2,
-      ADD (VAR "x", VAR "x")),
-      ADD (VAR "x", VAR "y")))
+  Let ("x", Int 1,
+    Let ("y", Let ("x", Int 2,
+      Plus (Var "x", Var "x")),
+      Plus (Var "x", Var "y")))
 
 let p6 =
-  LET ("x", CONST 1,
-    LET ("y", CONST 2, 
-      IF (ISZERO (SUB (VAR "x", CONST 1)),
-        SUB (VAR "y", CONST 1),
-        ADD (VAR "y", CONST 1))))
+  Let ("x", Int 1,
+    Let ("y", Int 2, 
+      If (Iszero (Minus (Var "x", Int 1)),
+        Minus (Var "y", Int 1),
+        Plus (Var "y", Int 1))))
 
 let p7 =
-  LET ("x", CONST 1,
-    LET ("y", ISZERO (VAR "x"),
-      ADD (VAR "x", VAR "y")))
+  Let ("x", Int 1,
+    Let ("y", Iszero (Var "x"),
+      Plus (Var "x", Var "y")))
     
 (* Abstract Syntax Tree *)
 
 
 let p8 =
-  LET ("x", CONST 7,
-    LET ("y", CONST 2,
-      LET ("y", LET ("x", SUB(VAR "x", CONST 1),
-        SUB (VAR "x", VAR "y")),
-    SUB (SUB (VAR "x", CONST 8), VAR "y"))))
+  Let ("x", Int 7,
+    Let ("y", Int 2,
+      Let ("y", Let ("x", Minus(Var "x", Int 1),
+        Minus (Var "x", Var "y")),
+    Minus (Minus (Var "x", Int 8), Var "y"))))
 
 
-  
+(* semanics*)
+
+type value =
+  | VInt of int
+  | VBool of bool
+
+module Env = struct
+  type t = (string * value) list
+  let empty = []
+  let add (x, v) e = (x, v)::e
+  let rec lookup x e =
+    match e with
+      | [] -> raise (Failure (x ^ ": not bound"))
+      | (y, v)::tl ->
+        if x = y then v else lookup x tl
+end
+
+
+module Env2 = struct
+  type t = string -> value
+  let empty = fun x -> raise (Failure (x ^ ": not bound"))
+  let lookup x e = e x
+  let add (x, v) e =
+    fun y -> if x = y then v else e y
+end
