@@ -129,7 +129,14 @@ and eval: Env.t -> exp -> value
       let v1 = eval env e1 in
       let v = eval (Env.add (x, v1) env) e2 in v
 
-let interpret : program -> value
-= fun pgm -> eval Env.empty pgm;;
+let analyze_type: program -> bool
+= fun p -> true (* TODO *)
 
-interpret p1;;
+let interpret : program -> value
+= fun pgm -> 
+  match analyze_type pgm with
+    | true -> eval Env.empty pgm
+    | _ -> raise (TypeError "");;
+
+
+let _ = interpret p7;;
